@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <title>Table creation</title>
+    <style>
+        .header{
+            width:900px;
+            height:100px;
+            margin-left:auto;
+            margin-right:auto;
+            text-align: center;
+        }
+        #showData{
+          text-align: center;
+          width:900px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+        .main{
+          width:900px;
+          color:red;
+          margin-left: auto;
+          margin-right: auto;
+          text-align: center;
+        }
+        table, th, td
+        {
+            margin:10px;
+            border:solid 1px #333;
+            padding:2px 4px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        th {
+            font-weight:bold;
+        }
+        .button{
+          float:left;
+          padding-right: 30px;
+        }
+
+    </style>
+    <script>
+   var myData=[];
+   var current_page = 1;
+   var records_per_page = 4;
+   var start_id = 1;
+   $( document ).ready(function() {
+     $.getJSON("myJson.json", function(data) {
+          myData=data;
+          //console.log(myData);
+         });
+   });
+    function addData()
+      {
+        crimedata = {};
+      var year =document.getElementById('newYear').value;
+      var under_500=document.getElementById('newValue').value;
+      var above_500=document.getElementById('newValuee').value;
+      crimedata.year=year;
+      crimedata.under_500=under_500;
+      crimedata.above_500=above_500;
+      myData.push(crimedata);
+      CreateTable(1);
+      console.log(myData);
+      }
+
+      function del_row(i)
+      {
+          console.log(myData);
+        myData.splice(i, 1);
+        CreateTable(1);
+      }
+    function CreateTable(page_num) {
+          var end_id = page_num * records_per_page;
+
+          start_id =(end_id - records_per_page) + 1;
+          if(end_id>myData.length){
+              end_id = myData.length;
+            }
+          var number_of_pages = Math.ceil(myData.length / records_per_page);
+          var buttonContainer = document.getElementById("showButton");
+          buttonContainer.innerHTML="";
+         for(var button=1;button<=number_of_pages;button++)
+         {
+           buttonContainer.innerHTML = buttonContainer.innerHTML + "<input type='button' class='button' value="+button+" onclick='CreateTable(" + '"' + + button + '"' + ")' ></button>";
+         }
+
+        var col = [];
+        for (var i = 0; i < myData.length; i++) {
+            for (var key in myData[i]) {
+                if (col.indexOf(key) === -1) {
+                    col.push(key);
+                }
+            }
+        }
+        var table = document.createElement("table");
+        var tr = table.insertRow(-1);                   // TABLE ROW.
+        for (var i = 0; i < col.length; i++) {
+            var th = document.createElement("th");      // TABLE HEADER.
+            th.innerHTML = col[i];
+            tr.appendChild(th);
+        }
+
+        // ADD data
+        for (var i = start_id -1; i <end_id; i++) {
+
+            tr = table.insertRow(-1);
+
+            for (var j = 0; j < col.length; j++) {
+                 tabCell = tr.insertCell(-1);
+                tabCell.innerHTML = myData[i][col[j]];
+
+          }
+          tabCell = tr.insertCell(-1);
+          tabCell.innerHTML='<input type="button" id='+i+' value="Delete"  onclick="del_row('+i+')">';
+        }
+        var divContainer = document.getElementById("showData");
+        divContainer.innerHTML = "";
+        divContainer.appendChild(table);
+    }
+</script>
+</head>
+<body>
+    <div class="header"><h2>Analysis for Chicago crime</h2></div>
+    <div class="main">
+      <form method="post">
+        <br>
+         <input type ="text" placeholder="Enter year" id="newYear"></input>
+         <input type ="text" placeholder="Enter count over 500" id="newValue"></input>
+         <input type ="text" placeholder="Enter count below 500" id="newValuee"></input>
+         <input type="button" value="add" onclick="addData()"/>
+      </form>
+      <br><br>
+       <input type="button" onclick="CreateTable(1)" value="Create Table From JSON" />
+    </div>
+    <div id="showData"></div>
+    <div id="showButton" style="width:800px;margin-left:550px;margin-right:auto;"></div>
+    <div class="sub-main">
+      <br>
+
+    </div>
+</body>
+</html>
